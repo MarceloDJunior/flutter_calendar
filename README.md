@@ -11,9 +11,14 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages). 
 -->
 
+## Flutter Calendar
+
 Calendar widget for selecting dates in flutter.
 
 This project is very recent, and I plan to launch features, update the documentation and publish it soon :)
+
+| ![Image](https://raw.githubusercontent.com/MarceloDJunior/flutter_calendar/main/assets/flutter_calendar1.gif) | ![Image](https://raw.githubusercontent.com/MarceloDJunior/flutter_calendar/main/assets/flutter_calendar2.gif) |
+| :------------: | :------------: |
 
 ## Features
 
