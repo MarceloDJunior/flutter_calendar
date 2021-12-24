@@ -1,14 +1,9 @@
 import 'package:calendar/calendar.dart';
 import 'package:flutter/material.dart';
 
-class CalendarBottomSheet extends StatefulWidget {
-  const CalendarBottomSheet({Key? key}) : super(key: key);
+class DatePickerCalendar extends StatelessWidget {
+  const DatePickerCalendar({Key? key}) : super(key: key);
 
-  @override
-  _CalendarBottomSheetState createState() => _CalendarBottomSheetState();
-}
-
-class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -44,8 +39,8 @@ class _CalendarBottomSheetState extends State<CalendarBottomSheet> {
                 ),
               ),
               Calendar(
-                selectedDate: DateTime(2021, 11, 11),
-                minDate: DateTime.now(),
+                minDate: DateTime.now().subtract(const Duration(days: 1)),
+                selectedDate: DateTime.now(),
                 onChange: (DateTime date) {
                   // ignore: avoid_print
                   print(date);

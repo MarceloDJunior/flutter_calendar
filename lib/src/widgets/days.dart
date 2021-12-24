@@ -1,3 +1,4 @@
+import 'package:calendar/src/model/calendar_mode.dart';
 import 'package:calendar/src/providers/calendar_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/utils/datetime_utils.dart';
@@ -20,8 +21,11 @@ class Days extends StatelessWidget {
   Widget build(BuildContext context) {
     CalendarProvider provider = Provider.of<CalendarProvider>(context);
     DateTime? selectedDate = provider.selectedDate;
+    DateTime? startDate = provider.startDate;
+    DateTime? endDate = provider.endDate;
     DateTime? minDate = provider.minDate;
     DateTime? maxDate = provider.maxDate;
+    CalendarMode mode = provider.mode ?? CalendarMode.DATE_PICKER;
 
     final int numberOfDays =
         DateUtils.getDaysInMonth(visibleDate.year, visibleDate.month);
@@ -30,6 +34,36 @@ class Days extends StatelessWidget {
     _onDateChange(DateTime date) {
       Provider.of<CalendarProvider>(context, listen: false)
           .setSelectedDate(date);
+      onChange?.call(date);
+    }
+
+    _onDateRangeChange(DateTime date) {
+      DateTime? newStartDate = startDate;
+      DateTime? newEndDate = endDate;
+      if (startDate != null && endDate != null) {
+        newStartDate = null;
+      }
+      if (endDate != null) {
+        newEndDate = null;
+      }
+      if (newStartDate != null && newStartDate.isBefore(date)) {
+        newEndDate = date;
+      } else {
+        newStartDate = date;
+      }
+      Provider.of<CalendarProvider>(context, listen: false)
+          .setStartDate(newStartDate);
+      Provider.of<CalendarProvider>(context, listen: false)
+          .setEndDate(newEndDate);
+      // TODO: Call onDateRangeChange
+    }
+
+    _onDateClick(DateTime date) {
+      if (mode == CalendarMode.DATE_PICKER) {
+        _onDateChange(date);
+      } else {
+        _onDateRangeChange(date);
+      }
     }
 
     _onSelectedMonthChange(DateTime date) {
@@ -81,6 +115,49 @@ class Days extends StatelessWidget {
       return false;
     }
 
+    bool _isSelected(DateTime date) {
+      if (mode == CalendarMode.DATE_PICKER) {
+        return selectedDate != null &&
+            selectedDate.day == date.day &&
+            selectedDate.month == date.month &&
+            selectedDate.year == date.year;
+      } else {
+        bool isSelected = false;
+        if (startDate != null &&
+            startDate.day == date.day &&
+            startDate.month == date.month &&
+            startDate.year == date.year) {
+          isSelected = true;
+        }
+        if (endDate != null &&
+            endDate.day == date.day &&
+            endDate.month == date.month &&
+            endDate.year == date.year) {
+          isSelected = true;
+        }
+        return isSelected;
+      }
+    }
+
+    bool _isStartDate(DateTime date) {
+      return Provider.of<CalendarProvider>(context, listen: false)
+          .isStartDate(date);
+    }
+
+    bool _isEndDate(DateTime date) {
+      return Provider.of<CalendarProvider>(context, listen: false)
+          .isEndDate(date);
+    }
+
+    bool _isBetweenDates(DateTime date) {
+      if (mode == CalendarMode.DATE_PICKER) {
+        return false;
+      } else {
+        return Provider.of<CalendarProvider>(context, listen: false)
+            .isBetweenStartAndEndDate(date);
+      }
+    }
+
     _daysFromPreviousMonth() {
       return _getLastDaysFromPreviousMonth().map((day) {
         DateTime date = DateTime(
@@ -90,17 +167,15 @@ class Days extends StatelessWidget {
         );
         return Day(
           day: day,
-          selected: day == selectedDate?.day &&
-              DateTimeUtils.getPreviousMonth(visibleDate) ==
-                  selectedDate?.month &&
-              DateTimeUtils.getPreviousMonthYear(visibleDate) ==
-                  selectedDate?.year,
+          selected: _isSelected(date),
+          interval: _isBetweenDates(date),
+          startDate: _isStartDate(date),
+          endDate: _isEndDate(date),
           unfocused: true,
           disabled: _isDisabled(date),
           onClick: () {
-            _onDateChange(date);
+            _onDateClick(date);
             _onSelectedMonthChange(date);
-            onChange?.call(date);
           },
         );
       }).toList();
@@ -112,12 +187,12 @@ class Days extends StatelessWidget {
         return Day(
           day: day,
           disabled: _isDisabled(date),
-          selected: day == selectedDate?.day &&
-              visibleDate.month == selectedDate?.month &&
-              visibleDate.year == selectedDate?.year,
+          selected: _isSelected(date),
+          interval: _isBetweenDates(date),
+          startDate: _isStartDate(date),
+          endDate: _isEndDate(date),
           onClick: () {
-            _onDateChange(date);
-            onChange?.call(date);
+            _onDateClick(date);
           },
         );
       }).toList();
@@ -129,15 +204,15 @@ class Days extends StatelessWidget {
             DateTimeUtils.getNextMonth(visibleDate), day);
         return Day(
           day: day,
-          selected: day == selectedDate?.day &&
-              DateTimeUtils.getNextMonth(visibleDate) == selectedDate?.month &&
-              DateTimeUtils.getNextMonthYear(visibleDate) == selectedDate?.year,
+          selected: _isSelected(date),
+          interval: _isBetweenDates(date),
+          startDate: _isStartDate(date),
+          endDate: _isEndDate(date),
           unfocused: true,
           disabled: _isDisabled(date),
           onClick: () {
-            _onDateChange(date);
+            _onDateClick(date);
             _onSelectedMonthChange(date);
-            onChange?.call(date);
           },
         );
       }).toList();
@@ -148,9 +223,6 @@ class Days extends StatelessWidget {
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         primary: false,
-        padding: const EdgeInsets.all(2),
-        crossAxisSpacing: 6,
-        mainAxisSpacing: 6,
         crossAxisCount: 7,
         children: [
           ..._daysFromPreviousMonth(),

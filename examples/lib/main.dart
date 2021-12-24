@@ -1,4 +1,5 @@
-import 'package:example/calendar_bottom_sheet.dart';
+import 'package:examples/date-picker/date_picker_calendar.dart';
+import 'package:examples/date-range-picker/date_range_picker_calendar.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -35,7 +36,7 @@ class Home extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(30),
               child: GestureDetector(
                 onTap: () {
                   showModalBottomSheet(
@@ -48,13 +49,38 @@ class Home extends StatelessWidget {
                         maxHeight: MediaQuery.of(context).size.height * 0.9,
                       ),
                       child: const SingleChildScrollView(
-                        child: CalendarBottomSheet(),
+                        child: DatePickerCalendar(),
                       ),
                     ),
                   );
                 },
                 child: const Text(
-                  "Open calendar",
+                  "Open date picker calendar",
+                  style: TextStyle(fontSize: 18, color: Colors.cyan),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    isScrollControlled: true,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    context: context,
+                    builder: (ctx) => ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.9,
+                      ),
+                      child: const SingleChildScrollView(
+                        child: DateRangePickerCalendar(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Open date range picker calendar",
                   style: TextStyle(fontSize: 18, color: Colors.cyan),
                 ),
               ),
